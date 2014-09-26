@@ -1,9 +1,6 @@
 (function() {
 
   var raw_data = {},
-      //all_links = [],
-      //all_links_nodes = [],
-      all_nodes = {},
       width = 660,
       height = 500,
       force,
@@ -60,7 +57,6 @@
       l.target = nodes[link.target] || (nodes[link.target] = {name: link.target});
       ls.push(l);
     });
-    //console.log(all_links_nodes);
     return [nodes, ls];
   }
 
@@ -78,17 +74,16 @@
       .links(args.links)
       .size([args.width, args.height])
       .linkDistance(160)
-      .charge(-300)
+      .charge(-30)
       .on("tick", args.tick)
       .start();
   }
 
   function draw(args) {
     var link,
-        linktext,
         node,
         force,
-        nodes;
+        nodes_links;
 
     function tick(e) {
 
@@ -106,8 +101,7 @@
       });
     }
 
-    //all_links = computeLinks(args.level);
-    var nodes_links = computeNodes(computeLinks(args.level));
+    nodes_links = computeNodes(computeLinks(args.level));
     args.nodes = nodes_links[0];
     args.links = nodes_links[1];
     args.tick = tick;
