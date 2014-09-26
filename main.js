@@ -14,19 +14,11 @@
       };
 
   function getData(user, args, callback) {
-    d3.csv(user+'-'+args.level+'.csv', function(d) {
-      return {
-        source: d.source,
-        target: d.target,
-        type: d.type
-      };
-    }, function(error, rows) {
-      if(error) {
-        console.log(error);
-      } else {
-        raw_data[args.level] = rows;
-        callback(args);
-      }
+
+    d3.json(user+'-'+args.level+'.json', function(error, json) {
+      if (error) return console.warn(error);
+      raw_data[args.level] = json;
+      callback(args);
     });
   }
 
@@ -53,8 +45,12 @@
     links.forEach(function(link) {
       var l = {};
       l.type = link.type;
-      l.source = nodes[link.source] || (nodes[link.source] = {name: link.source});
-      l.target = nodes[link.target] || (nodes[link.target] = {name: link.target});
+      l.source = nodes[link.source] || (nodes[link.source] = _.find(raw_data.all_nodes, function(o) {
+        return o.id === link.source;
+      }));
+      l.target = nodes[link.target] || (nodes[link.target] = _.find(raw_data.all_nodes, function(o) {
+        return o.id === link.target;
+      }));
       ls.push(l);
     });
     return [nodes, ls];
@@ -63,7 +59,7 @@
   function computeLinks(level) {
     var all_links = [];
     for (var i = level; i > 0; i--) {
-      all_links = all_links.concat(raw_data[i]);
+      all_links = all_links.concat(raw_data[i].links);
     };
     return all_links;
   }
@@ -101,6 +97,10 @@
       });
     }
 
+    raw_data.all_nodes = [];
+    for (var i = args.level; i > 0; i--) {
+      raw_data.all_nodes = raw_data.all_nodes.concat(raw_data[i].nodes);
+    }
     nodes_links = computeNodes(computeLinks(args.level));
     args.nodes = nodes_links[0];
     args.links = nodes_links[1];

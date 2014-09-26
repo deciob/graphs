@@ -1,0 +1,81 @@
+{
+  "nodes": [
+    {
+      "name": "p",
+      "id": "p",
+      "root": false
+    },
+    {
+      "name": "w",
+      "id": "w",
+      "root": false
+    },
+    {
+      "name": "k",
+      "id": "k",
+      "root": false
+    },
+    {
+      "name": "h",
+      "id": "h",
+      "root": false
+    },
+    {
+      "name": "l",
+      "id": "l",
+      "root": false
+    },
+    {
+      "name": "m",
+      "id": "m",
+      "root": false
+    },
+    {
+      "name": "n",
+      "id": "n",
+      "root": false
+    },
+    {
+      "name": "q",
+      "id": "q",
+      "root": false
+    }
+  ],
+  "links": [
+    {
+      "source": "m",
+      "target": "n",
+      "type": "postcode"
+    },
+    {
+      "source": "m",
+      "target": "q",
+      "type": "postcode"
+    },
+    {
+      "source": "m",
+      "target": "p",
+      "type": "ip_address"
+    },
+    {
+      "source": "m",
+      "target": "w",
+      "type": "birthdate"
+    },
+    {
+      "source": "m",
+      "target": "w",
+      "type": "postcode"
+    },
+    {
+      "source": "h",
+      "target": "l",
+      "type": "birthdate"
+    },
+    {
+      "source": "m",
+      "target": "k",
+      "type": "ip_address"
+    }
+  ]
+}

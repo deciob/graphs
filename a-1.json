@@ -1,0 +1,51 @@
+{
+  "nodes": [
+    {
+      "name": "a",
+      "id": "a",
+      "root": true
+    },
+    {
+      "name": "b",
+      "id": "b",
+      "root": false
+    },
+    {
+      "name": "c",
+      "id": "c",
+      "root": false
+    },
+    {
+      "name": "d",
+      "id": "d",
+      "root": false
+    }
+  ],
+  "links": [
+    {
+      "source": "a",
+      "target": "b",
+      "type": "postcode"
+    },
+    {
+      "source": "a",
+      "target": "c",
+      "type": "birthdate"
+    },
+    {
+      "source": "a",
+      "target": "d",
+      "type": "postcode"
+    },
+    {
+      "source": "a",
+      "target": "b",
+      "type": "postcode"
+    },
+    {
+      "source": "a",
+      "target": "b",
+      "type": "phone_number"
+    }
+  ]
+}
