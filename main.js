@@ -1,8 +1,10 @@
 (function() {
 
-  var links,
-      nodes,
-      width = 960,
+  var raw_data = {},
+      //all_links = [],
+      //all_links_nodes = [],
+      all_nodes = {},
+      width = 660,
       height = 500,
       force,
       viz,
@@ -11,10 +13,11 @@
         'postcode': {'arc_factor': 1.2},
         'birthdate': {'arc_factor': 1},
         'phone_number': {'arc_factor': 1.4},
+        'ip_address': {'arc_factor': 1.6},
       };
 
-  function getData(user, level, args, callback) {
-    d3.csv(user+'-'+level+'.csv', function(d) {
+  function getData(user, args, callback) {
+    d3.csv(user+'-'+args.level+'.csv', function(d) {
       return {
         source: d.source,
         target: d.target,
@@ -24,7 +27,7 @@
       if(error) {
         console.log(error);
       } else {
-        args.links = rows;
+        raw_data[args.level] = rows;
         callback(args);
       }
     });
@@ -47,13 +50,26 @@
   }
 
   function computeNodes(links) {
+    var ls = [];
     // Compute the distinct nodes from the links.
     var nodes = {};
     links.forEach(function(link) {
-      link.source = nodes[link.source] || (nodes[link.source] = {name: link.source});
-      link.target = nodes[link.target] || (nodes[link.target] = {name: link.target});
+      var l = {};
+      l.type = link.type;
+      l.source = nodes[link.source] || (nodes[link.source] = {name: link.source});
+      l.target = nodes[link.target] || (nodes[link.target] = {name: link.target});
+      ls.push(l);
     });
-    return nodes;
+    //console.log(all_links_nodes);
+    return [nodes, ls];
+  }
+
+  function computeLinks(level) {
+    var all_links = [];
+    for (var i = level; i > 0; i--) {
+      all_links = all_links.concat(raw_data[i]);
+    };
+    return all_links;
   }
 
   function computeForce(args) {
@@ -71,9 +87,10 @@
     var link,
         linktext,
         node,
-        force;
+        force,
+        nodes;
 
-    function tick() {
+    function tick(e) {
 
       link.attr("d", function(d) {
 
@@ -84,40 +101,28 @@
               + dr + " 0 0,1 " + d.target.x + "," + d.target.y;
       });
 
-      // link label
-      //linktext.attr("transform", function(d) {
-      //  return "translate(" + (d.source.x + d.target.x) / 2 + ","
-      //    + (d.source.y + d.target.y) / 2 + ")";
-      //});
-
-      node
-          .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
+      node.attr("transform", function(d) {
+        return "translate(" + d.x + "," + d.y + ")";
+      });
     }
 
-    args.nodes = computeNodes(args.links);
+    //all_links = computeLinks(args.level);
+    var nodes_links = computeNodes(computeLinks(args.level));
+    args.nodes = nodes_links[0];
+    args.links = nodes_links[1];
     args.tick = tick;
     force = computeForce(args);
     force
       .drag()
       .on("dragstart", dragstart);
 
+    viz.selectAll(".link").remove();
+    viz.selectAll(".node").remove();
+
     link = viz.selectAll(".link")
         .data(force.links())
       .enter().append("path")
         .attr("class", "link");
-
-
-    //linktext = viz.selectAll("g.linklabelholder").data(args.links);
-    //linktext.enter().append("g").attr("class", "linklabelholder")
-    //  .append("text")
-    //  .attr("class", "linklabel")
-    //  .attr("dx", 1)
-    //  .attr("dy", ".35em")
-    //  .attr("text-anchor", "middle")
-    //  .text(function(d) {
-    //    return d.type;
-    //  });
-
 
     node = viz.selectAll(".node")
         .data(force.nodes())
@@ -145,6 +150,13 @@
 
   args.width = width;
   args.height = height;
-  getData('a', 1, args, draw);
+  args.level = 1;
+  getData('a', args, draw);
+
+  d3.select('#js-level-chooser').on('change', function() {
+    args.prev_level = args.prev_level || 1;
+    args.level = this.value;
+    getData('a', args, draw);
+  });
 
 })();

@@ -1,0 +1,8 @@
+source,target,type
+b,g,postcode
+b,f,postcode
+b,a,ip_address
+c,e,postcode
+c,h,phone_number
+d,l,birthdate
+d,m,ip_address

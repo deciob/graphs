@@ -1,12 +1,18 @@
 
 #js-draw-area {
   border: 1px solid hsl(198, 34%, 26%);
+  width: 660px;
+  height: 500px;
 }
+
+/*#js-draw-area::after {
+  content: attr(#js-draw-area);
+}*/
 
 .link {
   fill: none;
   stroke: #666;
-  stroke-width: 1.5px;
+  stroke-width: .5px;
 }
 
 .node circle {

@@ -2,6 +2,5 @@ source,target,type
 a,b,postcode
 a,c,postcode
 a,d,postcode
-a,e,birthdate
+a,b,phone_number
 a,b,birthdate
-a,f,phone_number
