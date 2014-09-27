@@ -68,17 +68,30 @@ var force = cola.d3adaptor();
         .attr("cy", function (d) { return d.y; });       
   }
 
-  d3.json("data/a-1.json", function (error, graph) {
-    
-    graph.nodes.forEach(function(node) {
-      nodes.push(node);
-    });
-    buildLinkObjs(nodes, graph.links).forEach(function(link) {
-      links.push(link);
-    });
+  var requestData = function(user, level) {
+    d3.json('data/'+user+'-'+level+'.json', function (error, graph) {
 
-    start();
+      graph.nodes.forEach(function(node) {
+        nodes.push(node);
+      });
+      buildLinkObjs(nodes, graph.links).forEach(function(link) {
+        links.push(link);
+      });
+  
+      start();
+  
+    });
+  }
 
+  var requestDataMemoized = async.memoize(requestData);
+
+  d3.select('#js-level-chooser').on('change', function() {
+    //args.prev_level = args.prev_level || 1;
+    //args.level = this.value;
+    requestDataMemoized('a', this.value);
   });
+
+  requestDataMemoized('a', 1, null);
+  requestDataMemoized('a', 1, null);
 
 })();
