@@ -26,9 +26,11 @@ var force = cola.d3adaptor();
       link.target = _.find(nodes, function(node) {
         return link.target === node.id;
       });
+
       link.source = _.find(nodes, function(node) {
         return link.source === node.id;
       });
+      
       return link;
     });
   }
@@ -37,13 +39,22 @@ var force = cola.d3adaptor();
     link = link.data(force.links(), function (d) { 
       return d.source.id + "-" + d.target.id; 
     });
-    link.enter().insert("line", ".node").attr("class", "link");
+    link.enter()
+        .insert("line", ".node")
+        .attr("class", "link");
     link.exit().remove();
-    node = node.data(force.nodes(), function (d) { return d.id; });
-    node.enter().append("circle").attr("class", function (d) { 
-      return "node " + d.id; 
-    }).attr("r", 8);
+
+    node = node.data(force.nodes(), function (d) { 
+      return d.id; 
+    });
+    node.enter()
+        .append("circle")
+        .attr("class", function (d) { 
+          return "node " + d.id; 
+        })
+        .attr("r", 8);
     node.exit().remove();
+
     force.start();
   }
 
@@ -52,6 +63,7 @@ var force = cola.d3adaptor();
         .attr("y1", function (d) { return d.source.y; })
         .attr("x2", function (d) { return d.target.x; })
         .attr("y2", function (d) { return d.target.y; });
+
     node.attr("cx", function (d) { return d.x; })
         .attr("cy", function (d) { return d.y; });       
   }
