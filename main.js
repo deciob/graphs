@@ -27,8 +27,10 @@ var force = cola.d3adaptor();
   force
       .nodes(nodes)
       .links(links)
-      .linkDistance(70)
-      .flowLayout("x", 30)
+      .linkDistance(50)
+      .flowLayout("y", 40)
+      //.avoidOverlaps(true) // All goes wrong!!!
+      //.symmetricDiffLinkLengths(20) // This creates weird stuff!
       .size([width, height])
       .on("tick", tick);
 
@@ -114,7 +116,8 @@ var force = cola.d3adaptor();
         .attr("r", 10)
         .attr('fill', function(d) {
           return d.root ? rootColor : levelColors[d.level];
-        });
+        })
+        .call(force.drag);
     node.exit().remove();
 
     force.start();
