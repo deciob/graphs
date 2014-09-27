@@ -6,7 +6,8 @@ var force = cola.d3adaptor();
       height = 500,
       color = d3.scale.category20(),
       nodes = [], 
-      links = [];
+      links = []
+      prevLevel = 1;
 
   var svg = d3.select("#js-draw-area").append("svg")
       .attr("width", width)
@@ -21,21 +22,52 @@ var force = cola.d3adaptor();
       .size([width, height])
       .on("tick", tick);
 
-  function buildLinkObjs(nodes, links) {
-    return _.map(links, function(link) {
-      link.target = _.find(nodes, function(node) {
-        return link.target === node.id;
+  function buildLinkObjs(nodes, graphLinks, level) {
+    if (level >= prevLevel) {
+      return _.map(graphLinks, function(link) {
+        link.target = _.find(nodes, function(node) {
+          return link.target === node.id;
+        }) || link.target;
+  
+        link.source = _.find(nodes, function(node) {
+          return link.source === node.id;
+        }) || link.source;
+        
+        return link;
       });
-
-      link.source = _.find(nodes, function(node) {
-        return link.source === node.id;
-      });
-      
-      return link;
-    });
+    } else {
+      return graphLinks;
+    }
   }
 
-  function start() {
+  function setupNodes(graphNodes, level) {
+    if (level >= prevLevel) {
+      graphNodes.forEach(function(node) {
+        var isDuplicate = _.find(nodes, function(n) { return n.id === node.id; });
+        if (!isDuplicate) {
+          node.x = 0;
+          node.y = 0;
+          node.level = level;
+          nodes.push(node);
+        };
+      });
+    } else {
+      _.remove(nodes, function(n) { return n.level === prevLevel; });
+    }
+  }
+
+  function setupLinks(graphLinks, level) {
+    graphLinks.forEach(function(link) {
+      if (level >= prevLevel) {
+        link.level = level;
+        links.push(link);
+      } else {
+        _.remove(links, function(l) { return l.level === prevLevel; });
+      }
+    });    
+  }
+
+  function start(level) {
     link = link.data(force.links(), function (d) { 
       return d.source.id + "-" + d.target.id; 
     });
@@ -56,6 +88,7 @@ var force = cola.d3adaptor();
     node.exit().remove();
 
     force.start();
+    prevLevel = +level;
   }
 
   function tick() {
@@ -68,30 +101,26 @@ var force = cola.d3adaptor();
         .attr("cy", function (d) { return d.y; });       
   }
 
+  var processData = function(graph, level) {
+    setupNodes(graph.nodes, +level);
+    setupLinks(buildLinkObjs(nodes, graph.links, +level), +level);
+
+    start(level);
+  };
+
   var requestData = function(user, level, callback) {
     d3.json('data/'+user+'-'+level+'.json', function (error, graph) {
-
-      graph.nodes.forEach(function(node) {
-        nodes.push(node);
-      });
-      buildLinkObjs(nodes, graph.links).forEach(function(link) {
-        links.push(link);
-      });
-  
-      start();
-  
+      return callback(graph, level);
     });
-  }
+  };
 
-  var requestDataMemoized = async.memoize(requestData, function(user, level) {return user+level});
+  var requestDataMemoized = async.memoize(requestData, function(user, level) {
+    return user+level});
 
   d3.select('#js-level-chooser').on('change', function() {
-    //args.prev_level = args.prev_level || 1;
-    //args.level = this.value;
-    requestDataMemoized('a', this.value, null);
+    requestDataMemoized('a', this.value, processData);
   });
 
-  requestDataMemoized('a', 1, null);
-  //requestDataMemoized('a', 1, null);
+  requestDataMemoized('a', 1, processData);
 
 })();

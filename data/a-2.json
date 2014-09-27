@@ -1,91 +1,11 @@
-{
-  "nodes": [
-    {
-      "name": "a",
-      "id": "a",
-      "root": true
-    },
-    {
-      "name": "b",
-      "id": "b",
-      "root": false
-    },
-    {
-      "name": "c",
-      "id": "c",
-      "root": false
-    },
-    {
-      "name": "d",
-      "id": "d",
-      "root": false
-    },
-    {
-      "name": "f",
-      "id": "f",
-      "root": false
-    },
-    {
-      "name": "h",
-      "id": "h",
-      "root": false
-    },
-    {
-      "name": "l",
-      "id": "l",
-      "root": false
-    },
-    {
-      "name": "m",
-      "id": "m",
-      "root": false
-    },
-    {
-      "name": "e",
-      "id": "e",
-      "root": false
-    },
-    {
-      "name": "g",
-      "id": "g",
-      "root": false
-    }
-  ],
-  "links": [
-    {
-      "source": "b",
-      "target": "g",
-      "type": "postcode"
-    },
-    {
-      "source": "b",
-      "target": "f",
-      "type": "postcode"
-    },
-    {
-      "source": "b",
-      "target": "a",
-      "type": "postcode"
-    },
-    {
-      "source": "c",
-      "target": "e",
-      "type": "birthdate"
-    },
-    {
-      "source": "c",
-      "target": "h",
-      "type": "postcode"
-    },
-    {
-      "source": "d",
-      "target": "l",
-      "type": "postcode"
-    },
-    {
-      "source": "d",
-      "target": "m",
-      "type": "ip_address"
-    }
-  ]
+{"nodes":[
+{"name":"b", "id":"b"},
+{"name":"d", "id":"d"},
+{"name":"e", "id":"e"}
+],
+"links":[
+{"target":"d","source":"b","value":1,"type":"postcode"},
+{"target":"e","source":"b","value":1,"type":"birthdate"}
+
+]
 }
