@@ -15,8 +15,8 @@
   stroke-width: .5px;
 }
 
-.node circle {
-  /*fill: #ccc;*/
+.node {
+  fill: #ccc;
   stroke: #fff;
   stroke-width: 1.5px;
 }
