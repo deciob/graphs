@@ -4,10 +4,12 @@ var force = cola.d3adaptor();
 
   var width = 660,
       height = 500,
-      color = d3.scale.category20(),
+      //color = d3.scale.category20(),
       nodes = [], 
       links = []
-      prevLevel = 1;
+      prevLevel = 1,
+      levelColors = {1: '#2b8cbe', 2: '#a6bddb', 3: '#ece7f2'},
+      rootColor = '#e66101';
 
   var svg = d3.select("#js-draw-area").append("svg")
       .attr("width", width)
@@ -18,7 +20,8 @@ var force = cola.d3adaptor();
   force
       .nodes(nodes)
       .links(links)
-      .linkDistance(120)
+      .linkDistance(80)
+      .flowLayout("x", 40)
       .size([width, height])
       .on("tick", tick);
 
@@ -40,7 +43,7 @@ var force = cola.d3adaptor();
     }
   }
 
-  function setupNodes(graphNodes, level) {
+  function setupNodes(graphNodes, level, user) {
     if (level >= prevLevel) {
       graphNodes.forEach(function(node) {
         var isDuplicate = _.find(nodes, function(n) { return n.id === node.id; });
@@ -48,6 +51,9 @@ var force = cola.d3adaptor();
           node.x = 0;
           node.y = 0;
           node.level = level;
+          if (node.id === user) {
+            node.root = true;
+          }
           nodes.push(node);
         };
       });
@@ -62,7 +68,9 @@ var force = cola.d3adaptor();
         link.level = level;
         links.push(link);
       } else {
-        _.remove(links, function(l) { return l.level === prevLevel; });
+        _.remove(links, function(l) { 
+          return l.level === prevLevel; 
+        });
       }
     });    
   }
@@ -80,11 +88,14 @@ var force = cola.d3adaptor();
       return d.id; 
     });
     node.enter()
-        .append("circle")
+      .append("circle")
         .attr("class", function (d) { 
-          return "node " + d.id; 
+          return "node " + d.id;
         })
-        .attr("r", 8);
+        .attr("r", 8)
+        .attr('fill', function(d) {
+          return d.root ? rootColor : levelColors[d.level];
+        });
     node.exit().remove();
 
     force.start();
@@ -101,8 +112,8 @@ var force = cola.d3adaptor();
         .attr("cy", function (d) { return d.y; });       
   }
 
-  var processData = function(graph, level) {
-    setupNodes(graph.nodes, +level);
+  var processData = function(graph, level, user) {
+    setupNodes(graph.nodes, +level, user);
     setupLinks(buildLinkObjs(nodes, graph.links, +level), +level);
 
     start(level);
@@ -110,7 +121,7 @@ var force = cola.d3adaptor();
 
   var requestData = function(user, level, callback) {
     d3.json('data/'+user+'-'+level+'.json', function (error, graph) {
-      return callback(graph, level);
+      return callback(graph, level, user);
     });
   };
 

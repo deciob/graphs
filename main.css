@@ -16,7 +16,7 @@
 }
 
 .node {
-  fill: #ccc;
+  /*fill: #ccc;*/
   stroke: #fff;
   stroke-width: 1.5px;
 }
@@ -29,4 +29,5 @@ text {
   font: 10px sans-serif;
   pointer-events: none;
 }
+
 
