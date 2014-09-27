@@ -1,0 +1,16 @@
+{"nodes":[
+{"name":"a", "id":"a"},
+{"name":"b", "id":"b"},
+{"name":"c", "id":"c"},
+{"name":"d", "id":"d"},
+{"name":"e", "id":"e"}
+],
+"links":[
+{"target":"b","source":"a","value":1,"type":"postcode"},
+{"target":"c","source":"a","value":1,"type":"birthdate"},
+{"target":"d","source":"a","value":1,"type":"postcode"},
+{"target":"b","source":"a","value":1,"type":"ip_address"},
+{"target":"e","source":"a","value":1,"type":"postcode"}
+
+]
+}
