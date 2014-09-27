@@ -68,7 +68,7 @@ var force = cola.d3adaptor();
         .attr("cy", function (d) { return d.y; });       
   }
 
-  var requestData = function(user, level) {
+  var requestData = function(user, level, callback) {
     d3.json('data/'+user+'-'+level+'.json', function (error, graph) {
 
       graph.nodes.forEach(function(node) {
@@ -83,15 +83,15 @@ var force = cola.d3adaptor();
     });
   }
 
-  var requestDataMemoized = async.memoize(requestData);
+  var requestDataMemoized = async.memoize(requestData, function(user, level) {return user+level});
 
   d3.select('#js-level-chooser').on('change', function() {
     //args.prev_level = args.prev_level || 1;
     //args.level = this.value;
-    requestDataMemoized('a', this.value);
+    requestDataMemoized('a', this.value, null);
   });
 
   requestDataMemoized('a', 1, null);
-  requestDataMemoized('a', 1, null);
+  //requestDataMemoized('a', 1, null);
 
 })();
