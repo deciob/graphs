@@ -1,15 +1,22 @@
+'use strict'
+
 var force = cola.d3adaptor();
 
 (function() {
 
   var width = 660,
       height = 500,
-      //color = d3.scale.category20(),
       nodes = [], 
-      links = []
+      links = [],
       prevLevel = 1,
       levelColors = {1: '#2b8cbe', 2: '#a6bddb', 3: '#ece7f2'},
-      rootColor = '#e66101';
+      rootColor = '#e66101',
+      linkWeights = {
+        'postcode': 1,
+        'birthdate': 2,
+        'phone_number': 3,
+        'ip_address': 4,
+      };
 
   var svg = d3.select("#js-draw-area").append("svg")
       .attr("width", width)
@@ -20,8 +27,8 @@ var force = cola.d3adaptor();
   force
       .nodes(nodes)
       .links(links)
-      .linkDistance(80)
-      .flowLayout("x", 40)
+      .linkDistance(70)
+      .flowLayout("x", 30)
       .size([width, height])
       .on("tick", tick);
 
@@ -62,10 +69,19 @@ var force = cola.d3adaptor();
     }
   }
 
+  function computeWeight(link) {
+    var weight = 0;
+    _.forEach(link.types, function(t) {
+      if (linkWeights[t]) { weight += linkWeights[t] };
+    });
+    return weight;
+  }
+
   function setupLinks(graphLinks, level) {
     graphLinks.forEach(function(link) {
       if (level >= prevLevel) {
         link.level = level;
+        link.weight = computeWeight(link);
         links.push(link);
       } else {
         _.remove(links, function(l) { 
@@ -81,6 +97,9 @@ var force = cola.d3adaptor();
     });
     link.enter()
         .insert("line", ".node")
+        .attr('stroke-width', function (d) {
+          return d.weight;
+        })
         .attr("class", "link");
     link.exit().remove();
 
@@ -92,7 +111,7 @@ var force = cola.d3adaptor();
         .attr("class", function (d) { 
           return "node " + d.id;
         })
-        .attr("r", 8)
+        .attr("r", 10)
         .attr('fill', function(d) {
           return d.root ? rootColor : levelColors[d.level];
         });
