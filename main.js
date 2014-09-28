@@ -22,7 +22,8 @@ var force = cola.d3adaptor();
       .attr("width", width)
       .attr("height", height);
   var link = svg.selectAll(".link");
-  var node = svg.selectAll(".node"); 
+  var node = svg.selectAll(".node");
+  var linktext = svg.selectAll("g.linklabelholder");
 
   force
       .nodes(nodes)
@@ -120,6 +121,19 @@ var force = cola.d3adaptor();
         .call(force.drag);
     node.exit().remove();
 
+    linktext = linktext.data(force.links(), function (d) { 
+      return d.source.id + "-" + d.target.id; 
+    });
+    linktext.enter().append("g").attr("class", "linklabelholder")
+      .append("text")
+      .attr("class", "linklabel")
+      .attr("dx", 1)
+      .attr("dy", ".35em")
+      .attr("text-anchor", "middle")
+      .text(function(d) { 
+        return d.types.join(','); 
+      });
+
     force.start();
     prevLevel = +level;
   }
@@ -131,7 +145,12 @@ var force = cola.d3adaptor();
         .attr("y2", function (d) { return d.target.y; });
 
     node.attr("cx", function (d) { return d.x; })
-        .attr("cy", function (d) { return d.y; });       
+        .attr("cy", function (d) { return d.y; });
+
+    // link label
+    linktext.attr("transform", function(d) {
+      return "translate(" + (d.source.x + d.target.x) / 2 + "," 
+      + (d.source.y + d.target.y) / 2 + ")"; });     
   }
 
   var processData = function(graph, level, user) {

@@ -1,4 +1,6 @@
 {"nodes":[
+{"name":"a", "id":"a"},
+
 {"name":"f", "id":"f"},
 {"name":"g", "id":"g"},
 {"name":"e", "id":"e"},
@@ -13,7 +15,8 @@
 
 {"target":"fa","source":"eb","value":1,"types":["postcode"]},
 {"target":"fb","source":"eb","value":1,"types":["postcode"]},
-{"target":"fc","source":"eb","value":1,"types":["postcode", "ip_address"]}
+{"target":"fc","source":"eb","value":1,"types":["postcode", "ip_address"]},
 
+{"target":"a","source":"fb","value":1,"types":["postcode"]}
 ]
 }

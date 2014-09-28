@@ -26,8 +26,10 @@
 }
 
 text {
-  font: 10px sans-serif;
+  font: 8px sans-serif;
   pointer-events: none;
+  fill: #666;
+  stroke: none;
 }
 
 
