@@ -22,6 +22,8 @@ var force = cola.d3adaptor();
       .attr("width", width)
       .attr("height", height);
   var link = svg.selectAll(".link");
+  var path = svg.selectAll("path");
+
   var node = svg.selectAll(".node"); 
 
   force
@@ -94,16 +96,26 @@ var force = cola.d3adaptor();
   }
 
   function start(level) {
-    link = link.data(force.links(), function (d) { 
+    //link = link.data(force.links(), function (d) { 
+    //  return d.source.id + "-" + d.target.id; 
+    //});
+    //link.enter()
+    //    .insert("line", ".node")
+    //    .attr('stroke-width', function (d) {
+    //      return d.weight;
+    //    })
+    //    .attr("class", "link");
+    //link.exit().remove();
+
+    path = path.data(force.links(), function (d) { 
       return d.source.id + "-" + d.target.id; 
     });
-    link.enter()
-        .insert("line", ".node")
+    path.enter()
+        .append("svg:path")
         .attr('stroke-width', function (d) {
           return d.weight;
         })
         .attr("class", "link");
-    link.exit().remove();
 
     node = node.data(force.nodes(), function (d) { 
       return d.id; 
@@ -125,10 +137,17 @@ var force = cola.d3adaptor();
   }
 
   function tick() {
-    link.attr("x1", function (d) { return d.source.x; })
-        .attr("y1", function (d) { return d.source.y; })
-        .attr("x2", function (d) { return d.target.x; })
-        .attr("y2", function (d) { return d.target.y; });
+    //link.attr("x1", function (d) { return d.source.x; })
+    //    .attr("y1", function (d) { return d.source.y; })
+    //    .attr("x2", function (d) { return d.target.x; })
+    //    .attr("y2", function (d) { return d.target.y; });
+
+    path.attr("d", function (d) {
+        var dx = d.target.x - d.source.x,
+            dy = d.target.y - d.source.y,
+            dr = Math.sqrt(dx * dx + dy * dy);
+        return "M" + d.source.x + "," + d.source.y + "A" + dr + "," + dr + " 0 0 1," + d.target.x + "," + d.target.y;
+    });
 
     node.attr("cx", function (d) { return d.x; })
         .attr("cy", function (d) { return d.y; });       
