@@ -4,8 +4,8 @@ var force = cola.d3adaptor();
 
 (function() {
 
-  var width = 660,
-      height = 500,
+  var width = 760,
+      height = 700,
       nodes = [], 
       links = [],
       prevLevel = 1,
@@ -21,7 +21,7 @@ var force = cola.d3adaptor();
   var svg = d3.select("#js-draw-area").append("svg")
       .attr("width", width)
       .attr("height", height);
-  var link = svg.selectAll(".link");
+  //var link = svg.selectAll(".link");
   var path = svg.selectAll("path");
 
   var node = svg.selectAll(".node"); 
@@ -29,8 +29,8 @@ var force = cola.d3adaptor();
   force
       .nodes(nodes)
       .links(links)
-      .linkDistance(50)
-      .flowLayout("y", 40)
+      .linkDistance(90)
+      .flowLayout("x", 60)
       //.avoidOverlaps(true) // All goes wrong!!!
       //.symmetricDiffLinkLengths(20) // This creates weird stuff!
       .size([width, height])
@@ -111,11 +111,12 @@ var force = cola.d3adaptor();
       return d.source.id + "-" + d.target.id; 
     });
     path.enter()
-        .append("svg:path")
+        .insert("svg:path")
         .attr('stroke-width', function (d) {
           return d.weight;
         })
         .attr("class", "link");
+    path.exit().remove();
 
     node = node.data(force.nodes(), function (d) { 
       return d.id; 
