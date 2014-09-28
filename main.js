@@ -4,8 +4,8 @@ var force = cola.d3adaptor();
 
 (function() {
 
-  var width = 760,
-      height = 700,
+  var width = 860,
+      height = 800,
       nodes = [], 
       links = [],
       prevLevel = 1,
@@ -23,13 +23,13 @@ var force = cola.d3adaptor();
       .attr("height", height);
   //var link = svg.selectAll(".link");
   var path = svg.selectAll("path");
-
   var node = svg.selectAll(".node"); 
+  var linktext = svg.selectAll("g.linklabelholder");
 
   force
       .nodes(nodes)
       .links(links)
-      .linkDistance(90)
+      .linkDistance(120)
       .flowLayout("x", 60)
       //.avoidOverlaps(true) // All goes wrong!!!
       //.symmetricDiffLinkLengths(20) // This creates weird stuff!
@@ -96,26 +96,21 @@ var force = cola.d3adaptor();
   }
 
   function start(level) {
-    //link = link.data(force.links(), function (d) { 
-    //  return d.source.id + "-" + d.target.id; 
-    //});
-    //link.enter()
-    //    .insert("line", ".node")
-    //    .attr('stroke-width', function (d) {
-    //      return d.weight;
-    //    })
-    //    .attr("class", "link");
-    //link.exit().remove();
+    console.log(level);
 
     path = path.data(force.links(), function (d) { 
       return d.source.id + "-" + d.target.id; 
     });
     path.enter()
-        .insert("svg:path")
+        .append("svg:path")
         .attr('stroke-width', function (d) {
+          console.log('appending path');
           return d.weight;
         })
-        .attr("class", "link");
+        .attr("class", "link")
+        .attr('id', function(d) {
+          return d.source.id + "-" + d.target.id;
+        });
     path.exit().remove();
 
     node = node.data(force.nodes(), function (d) { 
@@ -123,15 +118,35 @@ var force = cola.d3adaptor();
     });
     node.enter()
       .append("circle")
-        .attr("class", function (d) { 
+        .attr("class", function (d) {
+          console.log('appending node');
           return "node " + d.id;
         })
-        .attr("r", 10)
+        .attr("r", 14)
         .attr('fill', function(d) {
           return d.root ? rootColor : levelColors[d.level];
         })
         .call(force.drag);
     node.exit().remove();
+
+    linktext = linktext.data(force.links(), function (d) { 
+      return d.source.id + "-" + d.target.id; 
+    });
+    linktext.enter().append("g").attr("class", "linklabelholder")
+      .append("text")
+        .attr("class", "linklabel")
+        .attr("dx", 1)
+        .attr("dy", "-.5em")
+        .attr("text-anchor", "middle")
+      .append('textPath')
+        .attr("xlink:xlink:href", function(d) { 
+          return '#' + d.source.id + "-" + d.target.id;
+        })
+        .attr("startOffset", '50%')
+        .text(function(d) { 
+          return d.types.join(' - '); 
+        });
+    linktext.exit().remove();
 
     force.start();
     prevLevel = +level;
@@ -151,7 +166,11 @@ var force = cola.d3adaptor();
     });
 
     node.attr("cx", function (d) { return d.x; })
-        .attr("cy", function (d) { return d.y; });       
+        .attr("cy", function (d) { return d.y; });
+
+    //linktext.attr("xlink:xlink:href", function(d) {
+    //  return '#' + d.id
+    //});   
   }
 
   var processData = function(graph, level, user) {

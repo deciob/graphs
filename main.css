@@ -1,8 +1,8 @@
 
 #js-draw-area {
   border: 1px solid hsl(198, 34%, 26%);
-  width: 760px;
-  height: 700px;
+  width: 860px;
+  height: 800px;
 }
 
 /*#js-draw-area::after {
@@ -28,6 +28,7 @@
 text {
   font: 10px sans-serif;
   pointer-events: none;
+  fill: #666;
 }
 
 
