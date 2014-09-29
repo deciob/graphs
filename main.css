@@ -1,8 +1,9 @@
 
 #js-draw-area {
+  position: relative;
   border: 1px solid hsl(198, 34%, 26%);
-  width: 660px;
-  height: 500px;
+  width: 860px;
+  height: 800px;
 }
 
 /*#js-draw-area::after {
@@ -12,17 +13,39 @@
 .link {
   fill: none;
   stroke: #666;
-  stroke-width: .5px;
+  /*stroke-width: .5px;*/
 }
 
-.node circle {
-  fill: #ccc;
+.node {
+  /*fill: #ccc;*/
   stroke: #fff;
   stroke-width: 1.5px;
 }
 
-text {
-  font: 10px sans-serif;
-  pointer-events: none;
+.node circle.root {
+  /*fill: #7F2524;*/
 }
+
+text {
+  font: 8px sans-serif;
+  pointer-events: none;
+  fill: #666;
+}
+
+.controls {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+}
+
+#js-level-chooser {
+  position: absolute;
+  top: 60px;
+  right: 20px;
+}
+
+.active {
+  background-color: #E37A59;
+}
+
 

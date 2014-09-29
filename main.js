@@ -1,156 +1,227 @@
+'use strict'
+
+var force = cola.d3adaptor();
+
 (function() {
 
-  var raw_data = {},
-      width = 660,
-      height = 500,
-      force,
-      viz,
-      args = {}
-      link_conf = {
-        'postcode': {'arc_factor': 1.2},
-        'birthdate': {'arc_factor': 1},
-        'phone_number': {'arc_factor': 1.4},
-        'ip_address': {'arc_factor': 1.6},
+  var width = 860,
+      height = 800,
+      nodeData = [],
+      linkData = [],
+      prevLevel = 1,
+      levelColors = {1: '#2b8cbe', 2: '#a6bddb', 3: '#ece7f2'},
+      rootColor = '#e66101',
+      linkWeights = {
+        'postcode': 1,
+        'birthdate': 2,
+        'phone_number': 3,
+        'ip_address': 4,
       };
 
-  function getData(user, args, callback) {
+  var zoom = d3.behavior.zoom()
+    .scaleExtent([.5, 2])
+    .on("zoom", zoomed);
 
-    d3.json(user+'-'+args.level+'.json', function(error, json) {
-      if (error) return console.warn(error);
-      raw_data[args.level] = json;
-      callback(args);
-    });
-  }
-
-  function dragstart(d) {
-    d3.select(this).classed("fixed", d.fixed = true);
-  }
-
-  function mouseover() {
-    d3.select(this).select("circle").transition()
-        .duration(750)
-        .attr("r", 16);
-  }
-
-  function mouseout() {
-    d3.select(this).select("circle").transition()
-        .duration(750)
-        .attr("r", 8);
-  }
-
-  function computeNodes(links) {
-    var ls = [];
-    // Compute the distinct nodes from the links.
-    var nodes = {};
-    links.forEach(function(link) {
-      var l = {};
-      l.type = link.type;
-      l.source = nodes[link.source] || (nodes[link.source] = _.find(raw_data.all_nodes, function(o) {
-        return o.id === link.source;
-      }));
-      l.target = nodes[link.target] || (nodes[link.target] = _.find(raw_data.all_nodes, function(o) {
-        return o.id === link.target;
-      }));
-      ls.push(l);
-    });
-    return [nodes, ls];
-  }
-
-  function computeLinks(level) {
-    var all_links = [];
-    for (var i = level; i > 0; i--) {
-      all_links = all_links.concat(raw_data[i].links);
-    };
-    return all_links;
-  }
-
-  function computeForce(args) {
-    return d3.layout.force()
-      .nodes(d3.values(args.nodes))
-      .links(args.links)
-      .size([args.width, args.height])
-      .linkDistance(160)
-      .charge(-30)
-      .on("tick", args.tick)
-      .start();
-  }
-
-  function draw(args) {
-    var link,
-        node,
-        force,
-        nodes_links;
-
-    function tick(e) {
-
-      link.attr("d", function(d) {
-
-        var dx = d.target.x - d.source.x,
-            dy = d.target.y - d.source.y,
-            dr = Math.sqrt(dx * dx + dy * dy) / link_conf[d.type].arc_factor;
-        return "M" + d.source.x + "," + d.source.y + "A" + dr + ","
-              + dr + " 0 0,1 " + d.target.x + "," + d.target.y;
-      });
-
-      node.attr("transform", function(d) {
-        return "translate(" + d.x + "," + d.y + ")";
-      });
-    }
-
-    raw_data.all_nodes = [];
-    for (var i = args.level; i > 0; i--) {
-      raw_data.all_nodes = raw_data.all_nodes.concat(raw_data[i].nodes);
-    }
-    nodes_links = computeNodes(computeLinks(args.level));
-    args.nodes = nodes_links[0];
-    args.links = nodes_links[1];
-    args.tick = tick;
-    force = computeForce(args);
-    force
-      .drag()
-      .on("dragstart", dragstart);
-
-    viz.selectAll(".link").remove();
-    viz.selectAll(".node").remove();
-
-    link = viz.selectAll(".link")
-        .data(force.links())
-      .enter().append("path")
-        .attr("class", "link");
-
-    node = viz.selectAll(".node")
-        .data(force.nodes())
-      .enter().append("g")
-        .attr("class", "node")
-        .on("mouseover", mouseover)
-        .on("mouseout", mouseout)
-        .call(force.drag);
-
-    node.append("circle")
-        .attr("r", 8);
-
-    node.append("text")
-        .attr("x", 12)
-        .attr("dy", ".35em")
-        .text(function(d) {
-          return d.name;
-        });
-  }
-
-  viz = d3.select("#js-draw-area").append("svg")
+  var root = d3.select("#js-draw-area").append("svg")
       .attr("width", width)
       .attr("height", height)
-    .append("g");
+      .append('g')
+      .call(zoom);
 
-  args.width = width;
-  args.height = height;
-  args.level = 1;
-  getData('a', args, draw);
+  var svg = root.append("g");
+  var linkGroup = svg.append("g")
+      .attr("class", ".linkGroup");
+  var links = linkGroup.selectAll(".link");
+  var nodeGroup = svg.append("g")
+      .attr("class", ".nodeGroup");
+  var nodes = nodeGroup.selectAll(".node");
+  var textGroup = svg.append("g")
+      .attr("class", ".textGroup");
+  var linkstext = textGroup.selectAll("g.linklabelholder");
 
-  d3.select('#js-level-chooser').on('change', function() {
-    args.prev_level = args.prev_level || 1;
-    args.level = this.value;
-    getData('a', args, draw);
+  function zoomed() {
+    svg.attr("transform", "translate(" + d3.event.translate + ")scale(" +
+     d3.event.scale + ")");
+  }
+
+  function slided(d){
+    zoom.scale(d3.select(this).property("value"))
+      .event(svg);
+  }
+
+  force
+      .nodes(nodeData)
+      .links(linkData)
+      .linkDistance(120)
+      .flowLayout("x", 60)
+      //.avoidOverlaps(true) // All goes wrong!!!
+      //.symmetricDiffLinkLengths(20) // This creates weird stuff!
+      .size([width, height])
+      .on("tick", tick);
+
+  function buildLinkObjs(nodes, graphLinks, level) {
+    if (level >= prevLevel) {
+      return _.map(graphLinks, function(link) {
+        link.target = _.find(nodes, function(node) {
+          return link.target === node.id;
+        }) || link.target;
+
+        link.source = _.find(nodes, function(node) {
+          return link.source === node.id;
+        }) || link.source;
+
+        return link;
+      });
+    } else {
+      return graphLinks;
+    }
+  }
+
+  function setupNodes(graphNodes, level, user) {
+    if (level >= prevLevel) {
+      graphNodes.forEach(function(node) {
+        var isDuplicate = _.find(nodeData, function(n) {
+          return n.id === node.id;
+        });
+        if (!isDuplicate) {
+          node.x = 0;
+          node.y = 0;
+          node.level = level;
+          if (node.id === user) {
+            node.root = true;
+          }
+          nodeData.push(node);
+        };
+      });
+    } else {
+      _.remove(nodeData, function(n) { return n.level === prevLevel; });
+    }
+  }
+
+  function setupLinks(graphLinks, level) {
+    graphLinks.forEach(function(link) {
+      if (level >= prevLevel) {
+        link.level = level;
+        link.weight = computeWeight(link);
+        linkData.push(link);
+      } else {
+        _.remove(linkData, function(l) {
+          return l.level === prevLevel;
+        });
+      }
+    });
+  }
+
+  function computeWeight(link) {
+    var weight = 0;
+    _.forEach(link.types, function(t) {
+      if (linkWeights[t]) { weight += linkWeights[t] };
+    });
+    return weight;
+  }
+
+  function startNodes(level) {
+    nodes = nodes.data(force.nodes(), function (d) {
+      return d.id;
+    });
+    nodes.enter()
+      .append("circle")
+        .attr("class", function (d) {
+          return "node " + d.id;
+        })
+        .attr("r", 14)
+        .attr('fill', function(d) {
+          return d.root ? rootColor : levelColors[d.level];
+        })
+        .call(force.drag);
+    nodes.exit().remove();
+  }
+
+  function startLinks(level) {
+    links = links.data(force.links(), function (d) {
+      return d.source.id + "-" + d.target.id;
+    });
+    links.enter()
+        .append("svg:path")
+        .attr('stroke-width', function (d) {
+          return d.weight;
+        })
+        .attr("class", "link")
+        .attr('id', function(d) {
+          return d.source.id + "-" + d.target.id;
+        });
+    links.exit().remove();
+  }
+
+  function startLinksText(level) {
+    linkstext = linkstext.data(force.links(), function (d) {
+      return d.source.id + "-" + d.target.id;
+    });
+    linkstext.enter().append("g").attr("class", "linklabelholder")
+      .append("text")
+        .attr("class", "linklabel")
+        .attr("dx", 1)
+        .attr("dy", "-.5em")
+        .attr("text-anchor", "middle")
+      .append('textPath')
+        .attr("xlink:xlink:href", function(d) {
+          return '#' + d.source.id + "-" + d.target.id;
+        })
+        .attr("startOffset", '50%')
+        .text(function(d) {
+          return d.types.join(' - ');
+        });
+    linkstext.exit().remove();
+  }
+
+  function start(level) {
+    startNodes(level);
+    startLinks(level);
+    startLinksText(level);
+
+    force.start();
+    prevLevel = +level;
+  }
+
+  function tick() {
+    links.attr("d", function (d) {
+        var dx = d.target.x - d.source.x,
+            dy = d.target.y - d.source.y,
+            dr = Math.sqrt(dx * dx + dy * dy);
+        return "M" + d.source.x + "," + d.source.y + "A" + dr + "," + dr +
+         " 0 0 1," + d.target.x + "," + d.target.y;
+    });
+
+    nodes.attr("cx", function (d) { return d.x; })
+        .attr("cy", function (d) { return d.y; });
+  }
+
+  var processData = function(graph, level, user) {
+    setupNodes(graph.nodes, +level, user);
+    setupLinks(buildLinkObjs(nodeData, graph.links, +level), +level);
+
+    start(level);
+  };
+
+  var requestData = function(user, level, callback) {
+    d3.json('data/'+user+'-'+level+'.json', function (error, graph) {
+      return callback(graph, level, user);
+    });
+  };
+
+  var requestDataMemoized = async.memoize(requestData, function(user, level) {
+    return user+level});
+
+  d3.selectAll('.controls > button').on('click', function() {
+    d3.selectAll(d3.select(this).node().parentNode.children)
+        .classed('active', false);
+    d3.select(this)
+        .classed('active', true);
+    requestDataMemoized('a', this.value, processData);
   });
+
+  d3.select('#js-level-chooser').on("input", slided);
+
+  requestDataMemoized('a', 1, processData);
 
 })();

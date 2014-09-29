@@ -1,0 +1,13 @@
+{"nodes":[
+{"name":"a", "id":"a"},
+{"name":"b", "id":"b"},
+{"name":"c", "id":"c"},
+{"name":"cc", "id":"cc"}
+],
+"links":[
+{"target":"b","source":"a","value":1,"types":["postcode", "birthdate"]},
+{"target":"c","source":"a","value":1,"types":["birthdate"]},
+{"target":"cc","source":"a","value":1,"types":["birthdate"]}
+
+]
+}
