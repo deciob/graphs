@@ -77,6 +77,56 @@ var force = cola.d3adaptor();
     }
   }
 
+
+
+  //################################################# Data setup
+
+  var processData = function(graph, level, user) {
+    setupLinkNodes(graph, level, user);
+
+    setupNodes(graph.nodes, +level, user);
+    setupLinks(buildLinkObjs(nodeData, graph.links, +level), +level);
+
+    start(level);
+  };
+
+  function setupLinkGroups(graphLinks) {
+    var linkGroups = {};
+    graphLinks.forEach(function(link) {
+      if (linkGroups[link.type] === undefined) {
+        linkGroups[link.type] = [link];
+      } else {
+        linkGroups[link.type].push(link);
+      }
+    });
+    return d3.map(linkGroups);
+  }
+
+  function setupLinkNodes(graph, level, user) {
+    var linkGroups = setupLinkGroups(graph.links);
+    // reset graphLinks
+    graph.links = [];
+    linkGroups.forEach(function(linkId, links) {
+      var nodeId = links[0].source + '-' + linkId;
+      // push new `link` node
+      graph.nodes.push({'id': nodeId, 'name': linkId, 'type': 'link-node'});
+      // push new pre links
+      graph.links.push({
+        'source': links[0].source,
+        'target': nodeId,
+        'type': links[0].type
+      });
+      links.forEach(function(link) {
+        // push new post links
+        graph.links.push({
+          'source': nodeId,
+          'target': link.target,
+          'type': link.type
+        });
+      });
+    });
+  }
+
   function setupNodes(graphNodes, level, user) {
     if (level >= prevLevel) {
       graphNodes.forEach(function(node) {
@@ -112,12 +162,16 @@ var force = cola.d3adaptor();
     });
   }
 
+  //#################################################//
+
+
+
   function computeWeight(link) {
-    var weight = 0;
-    _.forEach(link.types, function(t) {
-      if (linkWeights[t]) { weight += linkWeights[t] };
-    });
-    return weight;
+    //var weight = 0;
+    //_.forEach(link.types, function(t) {
+    //  if (linkWeights[t]) { weight += linkWeights[t] };
+    //});
+    return linkWeights[link.type];
   }
 
   function startNodes(level) {
@@ -128,9 +182,19 @@ var force = cola.d3adaptor();
         .enter()
       .append("circle")
         .attr("class", function (d) {
-          return "node " + d.id;
+          var c = "node " + d.id + " " + d.type;
+          if (d.root) {
+            c = c + " root"
+          }
+          return c;
         })
-        .attr("r", 14)
+        .attr("r", function (d) {
+          if (d.type) {
+            return 1;
+          } else {
+            return 12;
+          }
+        })
         .attr('fill', function(d) {
           return d.root ? rootColor : levelColors[d.level];
         })
@@ -182,7 +246,7 @@ var force = cola.d3adaptor();
   function start(level) {
     startNodes(level);
     startLinks(level);
-    startLinksText(level);
+    //startLinksText(level);
 
     force.start();
     prevLevel = +level;
@@ -201,16 +265,13 @@ var force = cola.d3adaptor();
         .attr("cy", function (d) { return d.y; });
   }
 
-  var processData = function(graph, level, user) {
-    setupNodes(graph.nodes, +level, user);
-    setupLinks(buildLinkObjs(nodeData, graph.links, +level), +level);
-
-    start(level);
-  };
-
   var requestData = function(user, level, callback) {
     d3.json('data/'+user+'-'+level+'.json', function (error, graph) {
-      return callback(graph, level, user);
+      if (error) {
+        console.error(error);
+      } else {
+        return callback(graph, level, user);
+      }
     });
   };
 
