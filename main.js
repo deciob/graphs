@@ -6,7 +6,7 @@ var force = cola.d3adaptor();
 
   var width = 860,
       height = 800,
-      nodes = [], 
+      nodes = [],
       links = [],
       prevLevel = 1,
       levelColors = {1: '#2b8cbe', 2: '#a6bddb', 3: '#ece7f2'},
@@ -23,7 +23,7 @@ var force = cola.d3adaptor();
       .attr("height", height);
   //var link = svg.selectAll(".link");
   var path = svg.selectAll("path");
-  var node = svg.selectAll(".node"); 
+  var node = svg.selectAll(".node");
   var linktext = svg.selectAll("g.linklabelholder");
 
   force
@@ -42,11 +42,11 @@ var force = cola.d3adaptor();
         link.target = _.find(nodes, function(node) {
           return link.target === node.id;
         }) || link.target;
-  
+
         link.source = _.find(nodes, function(node) {
           return link.source === node.id;
         }) || link.source;
-        
+
         return link;
       });
     } else {
@@ -73,6 +73,20 @@ var force = cola.d3adaptor();
     }
   }
 
+  function setupLinks(graphLinks, level) {
+    graphLinks.forEach(function(link) {
+      if (level >= prevLevel) {
+        link.level = level;
+        link.weight = computeWeight(link);
+        links.push(link);
+      } else {
+        _.remove(links, function(l) {
+          return l.level === prevLevel;
+        });
+      }
+    });
+  }
+
   function computeWeight(link) {
     var weight = 0;
     _.forEach(link.types, function(t) {
@@ -81,40 +95,9 @@ var force = cola.d3adaptor();
     return weight;
   }
 
-  function setupLinks(graphLinks, level) {
-    graphLinks.forEach(function(link) {
-      if (level >= prevLevel) {
-        link.level = level;
-        link.weight = computeWeight(link);
-        links.push(link);
-      } else {
-        _.remove(links, function(l) { 
-          return l.level === prevLevel; 
-        });
-      }
-    });    
-  }
-
-  function start(level) {
-    console.log(level);
-
-    path = path.data(force.links(), function (d) { 
-      return d.source.id + "-" + d.target.id; 
-    });
-    path.enter()
-        .append("svg:path")
-        .attr('stroke-width', function (d) {
-          console.log('appending path');
-          return d.weight;
-        })
-        .attr("class", "link")
-        .attr('id', function(d) {
-          return d.source.id + "-" + d.target.id;
-        });
-    path.exit().remove();
-
-    node = node.data(force.nodes(), function (d) { 
-      return d.id; 
+  function startNodes(level) {
+    node = node.data(force.nodes(), function (d) {
+      return d.id;
     });
     node.enter()
       .append("circle")
@@ -128,9 +111,28 @@ var force = cola.d3adaptor();
         })
         .call(force.drag);
     node.exit().remove();
+  }
 
-    linktext = linktext.data(force.links(), function (d) { 
-      return d.source.id + "-" + d.target.id; 
+  function startLinks(level) {
+    path = path.data(force.links(), function (d) {
+      return d.source.id + "-" + d.target.id;
+    });
+    path.enter()
+        .append("svg:path")
+        .attr('stroke-width', function (d) {
+          console.log('appending path');
+          return d.weight;
+        })
+        .attr("class", "link")
+        .attr('id', function(d) {
+          return d.source.id + "-" + d.target.id;
+        });
+    path.exit().remove();
+  }
+
+  function startLinksText(level) {
+    linktext = linktext.data(force.links(), function (d) {
+      return d.source.id + "-" + d.target.id;
     });
     linktext.enter().append("g").attr("class", "linklabelholder")
       .append("text")
@@ -139,14 +141,20 @@ var force = cola.d3adaptor();
         .attr("dy", "-.5em")
         .attr("text-anchor", "middle")
       .append('textPath')
-        .attr("xlink:xlink:href", function(d) { 
+        .attr("xlink:xlink:href", function(d) {
           return '#' + d.source.id + "-" + d.target.id;
         })
         .attr("startOffset", '50%')
-        .text(function(d) { 
-          return d.types.join(' - '); 
+        .text(function(d) {
+          return d.types.join(' - ');
         });
     linktext.exit().remove();
+  }
+
+  function start(level) {
+    startNodes(level);
+    startLinks(level);
+    //startLinksText(level);
 
     force.start();
     prevLevel = +level;
@@ -170,7 +178,7 @@ var force = cola.d3adaptor();
 
     //linktext.attr("xlink:xlink:href", function(d) {
     //  return '#' + d.id
-    //});   
+    //});
   }
 
   var processData = function(graph, level, user) {
