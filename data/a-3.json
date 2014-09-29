@@ -7,13 +7,16 @@
 {"name":"fc", "id":"fc"},
 {"name":"eb", "id":"eb"}
 ],
-"links":[
-{"target":"f","source":"e","value":1,"types":["postcode", "phone_number"]},
-{"target":"g","source":"e","value":1,"types":["postcode"]},
 
-{"target":"fa","source":"eb","value":1,"types":["postcode"]},
-{"target":"fb","source":"eb","value":1,"types":["postcode"]},
-{"target":"fc","source":"eb","value":1,"types":["postcode", "ip_address"]}
+"links":[
+{"target":"f","source":"e","value":1,"type": "postcode"},
+{"target":"f","source":"e","value":1,"type": "phone_number"},
+{"target":"g","source":"e","value":1,"type": "postcode"},
+
+{"target":"fa","source":"eb","value":1,"type": "postcode"},
+{"target":"fb","source":"eb","value":1,"type": "postcode"},
+{"target":"fc","source":"eb","value":1,"type": "postcode"},
+{"target":"fc","source":"eb","value":1,"type": "ip_address"}
 
 ]
 }

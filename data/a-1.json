@@ -1,13 +1,15 @@
 {"nodes":[
 {"name":"a", "id":"a"},
 {"name":"b", "id":"b"},
-{"name":"c", "id":"c"}
+{"name":"c", "id":"c"},
+{"name":"cc", "id":"cc"}
 ],
 
 "links":[
 {"source":"a", "target":"b", "value":1, "type":"postcode"},
 {"source":"a", "target":"c", "value":1, "type":"phone_number"},
-{"source":"a", "target":"c", "value":1, "type":"postcode"}
+{"source":"a", "target":"c", "value":1, "type":"postcode"},
+{"source":"a", "target":"cc", "value":1, "type":"birthdate"}
 
 ]
 }

@@ -6,13 +6,14 @@
 {"name":"eb", "id":"eb"},
 {"name":"cc", "id":"cc"}
 ],
-"links":[
-{"target":"d","source":"b","value":1,"types":["postcode"]},
-{"target":"e","source":"b","value":1,"types":["birthdate"]},
 
-{"target":"ee","source":"cc","value":1,"types":["birthdate"]},
-{"target":"eb","source":"cc","value":1,"types":["birthdate"]},
-{"target":"b","source":"cc","value":1,"types":["birthdate"]}
+"links":[
+{"target":"d","source":"b","value":1,"type": "postcode"},
+{"target":"e","source":"b","value":1,"types": "birthdate"},
+
+{"target":"ee","source":"cc","value":1,"types": "birthdate"},
+{"target":"eb","source":"cc","value":1,"types": "birthdate"},
+{"target":"b","source":"cc","value":1,"types": "birthdate"}
 
 ]
 }

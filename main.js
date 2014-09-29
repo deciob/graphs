@@ -52,8 +52,8 @@ var force = cola.d3adaptor();
   force
       .nodes(nodeData)
       .links(linkData)
-      .linkDistance(120)
-      .flowLayout("x", 60)
+      .linkDistance(90)
+      //.flowLayout("x", 60)
       //.avoidOverlaps(true) // All goes wrong!!!
       //.symmetricDiffLinkLengths(20) // This creates weird stuff!
       .size([width, height])
@@ -107,23 +107,32 @@ var force = cola.d3adaptor();
     // reset graphLinks
     graph.links = [];
     linkGroups.forEach(function(linkId, links) {
-      var nodeId = links[0].source + '-' + linkId;
-      // push new `link` node
-      graph.nodes.push({'id': nodeId, 'name': linkId, 'type': 'link-node'});
-      // push new pre links
-      graph.links.push({
-        'source': links[0].source,
-        'target': nodeId,
-        'type': links[0].type
-      });
-      links.forEach(function(link) {
-        // push new post links
+      if (links.length > 1) {
+        var nodeId = links[0].source + '-' + linkId;
+        // push new `link` node
+        graph.nodes.push({'id': nodeId, 'name': linkId, 'type': 'link-node'});
+        // push new pre links
         graph.links.push({
-          'source': nodeId,
-          'target': link.target,
-          'type': link.type
+          'source': links[0].source,
+          'target': nodeId,
+          'type': links[0].type
         });
-      });
+        links.forEach(function(link) {
+          // push new post links
+          graph.links.push({
+            'source': nodeId,
+            'target': link.target,
+            'type': link.type
+          });
+        });
+      } else {
+        // push old link back in place
+        graph.links.push({
+          'source': links[0].source,
+          'target': links[0].target,
+          'type': links[0].type
+        });
+      }
     });
   }
 
@@ -190,13 +199,19 @@ var force = cola.d3adaptor();
         })
         .attr("r", function (d) {
           if (d.type) {
-            return 1;
+            return 3;
           } else {
-            return 12;
+            return 9;
           }
         })
         .attr('fill', function(d) {
-          return d.root ? rootColor : levelColors[d.level];
+          if (d.root) {
+            return rootColor;
+          } else if(d.type) {
+            return '#ccc'
+          } else {
+            return levelColors[d.level];
+          }
         })
         .call(force.drag);
     nodes.exit().remove();
