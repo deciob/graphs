@@ -18,9 +18,17 @@ var force = cola.d3adaptor();
         'ip_address': 4,
       };
 
-  var svg = d3.select("#js-draw-area").append("svg")
+  var zoom = d3.behavior.zoom()
+    .scaleExtent([.5, 2])
+    .on("zoom", zoomed);
+
+  var root = d3.select("#js-draw-area").append("svg")
       .attr("width", width)
-      .attr("height", height);
+      .attr("height", height)
+      .append('g')
+      .call(zoom);
+
+  var svg = root.append("g");
   var linkGroup = svg.append("g")
       .attr("class", ".linkGroup");
   var links = linkGroup.selectAll(".link");
@@ -30,6 +38,16 @@ var force = cola.d3adaptor();
   var textGroup = svg.append("g")
       .attr("class", ".textGroup");
   var linkstext = textGroup.selectAll("g.linklabelholder");
+
+  function zoomed() {
+    svg.attr("transform", "translate(" + d3.event.translate + ")scale(" +
+     d3.event.scale + ")");
+  }
+
+  function slided(d){
+    zoom.scale(d3.select(this).property("value"))
+      .event(svg);
+  }
 
   force
       .nodes(nodeData)
@@ -159,7 +177,7 @@ var force = cola.d3adaptor();
   function start(level) {
     startNodes(level);
     startLinks(level);
-    //startLinksText(level);
+    startLinksText(level);
 
     force.start();
     prevLevel = +level;
@@ -201,6 +219,8 @@ var force = cola.d3adaptor();
         .classed('active', true);
     requestDataMemoized('a', this.value, processData);
   });
+
+  d3.select('#js-level-chooser').on("input", slided);
 
   requestDataMemoized('a', 1, processData);
 

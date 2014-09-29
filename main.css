@@ -27,7 +27,7 @@
 }
 
 text {
-  font: 10px sans-serif;
+  font: 8px sans-serif;
   pointer-events: none;
   fill: #666;
 }
@@ -35,6 +35,12 @@ text {
 .controls {
   position: absolute;
   top: 20px;
+  right: 20px;
+}
+
+#js-level-chooser {
+  position: absolute;
+  top: 60px;
   right: 20px;
 }
 
