@@ -194,7 +194,11 @@ var force = cola.d3adaptor();
   var requestDataMemoized = async.memoize(requestData, function(user, level) {
     return user+level});
 
-  d3.select('#js-level-chooser').on('change', function() {
+  d3.selectAll('.controls > button').on('click', function() {
+    d3.selectAll(d3.select(this).node().parentNode.children)
+        .classed('active', false);
+    d3.select(this)
+        .classed('active', true);
     requestDataMemoized('a', this.value, processData);
   });
 
