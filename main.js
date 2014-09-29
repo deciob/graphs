@@ -19,13 +19,13 @@ var force = cola.d3adaptor();
       };
 
   var zoom = d3.behavior.zoom()
-    .scaleExtent([.5, 2])
-    .on("zoom", zoomed);
+     .scaleExtent([.5, 2])
+     .on("zoom", zoomed);
 
   var root = d3.select("#js-draw-area").append("svg")
       .attr("width", width)
       .attr("height", height)
-      .append('g')
+    .append('g')
       .call(zoom);
 
   var svg = root.append("g");
@@ -46,7 +46,7 @@ var force = cola.d3adaptor();
 
   function slided(d){
     zoom.scale(d3.select(this).property("value"))
-      .event(svg);
+        .event(svg);
   }
 
   force
@@ -124,7 +124,8 @@ var force = cola.d3adaptor();
     nodes = nodes.data(force.nodes(), function (d) {
       return d.id;
     });
-    nodes.enter()
+    nodes
+        .enter()
       .append("circle")
         .attr("class", function (d) {
           return "node " + d.id;
@@ -141,8 +142,9 @@ var force = cola.d3adaptor();
     links = links.data(force.links(), function (d) {
       return d.source.id + "-" + d.target.id;
     });
-    links.enter()
-        .append("svg:path")
+    links
+        .enter()
+      .append("svg:path")
         .attr('stroke-width', function (d) {
           return d.weight;
         })
@@ -157,7 +159,10 @@ var force = cola.d3adaptor();
     linkstext = linkstext.data(force.links(), function (d) {
       return d.source.id + "-" + d.target.id;
     });
-    linkstext.enter().append("g").attr("class", "linklabelholder")
+    linkstext
+        .enter()
+      .append("g")
+        .attr("class", "linklabelholder")
       .append("text")
         .attr("class", "linklabel")
         .attr("dx", 1)
