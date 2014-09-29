@@ -21,7 +21,6 @@ var force = cola.d3adaptor();
   var svg = d3.select("#js-draw-area").append("svg")
       .attr("width", width)
       .attr("height", height);
-  //var link = svg.selectAll(".link");
   var path = svg.selectAll("path");
   var node = svg.selectAll(".node");
   var linktext = svg.selectAll("g.linklabelholder");
@@ -161,11 +160,6 @@ var force = cola.d3adaptor();
   }
 
   function tick() {
-    //link.attr("x1", function (d) { return d.source.x; })
-    //    .attr("y1", function (d) { return d.source.y; })
-    //    .attr("x2", function (d) { return d.target.x; })
-    //    .attr("y2", function (d) { return d.target.y; });
-
     path.attr("d", function (d) {
         var dx = d.target.x - d.source.x,
             dy = d.target.y - d.source.y,
@@ -175,10 +169,6 @@ var force = cola.d3adaptor();
 
     node.attr("cx", function (d) { return d.x; })
         .attr("cy", function (d) { return d.y; });
-
-    //linktext.attr("xlink:xlink:href", function(d) {
-    //  return '#' + d.id
-    //});
   }
 
   var processData = function(graph, level, user) {
