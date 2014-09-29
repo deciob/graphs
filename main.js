@@ -21,9 +21,15 @@ var force = cola.d3adaptor();
   var svg = d3.select("#js-draw-area").append("svg")
       .attr("width", width)
       .attr("height", height);
-  var links = svg.selectAll(".link");
-  var nodes = svg.selectAll(".node");
-  var linkstext = svg.selectAll("g.linklabelholder");
+  var linkGroup = svg.append("g")
+      .attr("class", ".linkGroup");
+  var links = linkGroup.selectAll(".link");
+  var nodeGroup = svg.append("g")
+      .attr("class", ".nodeGroup");
+  var nodes = nodeGroup.selectAll(".node");
+  var textGroup = svg.append("g")
+      .attr("class", ".textGroup");
+  var linkstext = textGroup.selectAll("g.linklabelholder");
 
   force
       .nodes(nodeData)
@@ -164,7 +170,8 @@ var force = cola.d3adaptor();
         var dx = d.target.x - d.source.x,
             dy = d.target.y - d.source.y,
             dr = Math.sqrt(dx * dx + dy * dy);
-        return "M" + d.source.x + "," + d.source.y + "A" + dr + "," + dr + " 0 0 1," + d.target.x + "," + d.target.y;
+        return "M" + d.source.x + "," + d.source.y + "A" + dr + "," + dr +
+         " 0 0 1," + d.target.x + "," + d.target.y;
     });
 
     nodes.attr("cx", function (d) { return d.x; })
