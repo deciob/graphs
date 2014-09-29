@@ -6,8 +6,8 @@ var force = cola.d3adaptor();
 
   var width = 860,
       height = 800,
-      nodes = [],
-      links = [],
+      nodeData = [],
+      linkData = [],
       prevLevel = 1,
       levelColors = {1: '#2b8cbe', 2: '#a6bddb', 3: '#ece7f2'},
       rootColor = '#e66101',
@@ -21,13 +21,13 @@ var force = cola.d3adaptor();
   var svg = d3.select("#js-draw-area").append("svg")
       .attr("width", width)
       .attr("height", height);
-  var path = svg.selectAll("path");
-  var node = svg.selectAll(".node");
-  var linktext = svg.selectAll("g.linklabelholder");
+  var links = svg.selectAll(".link");
+  var nodes = svg.selectAll(".node");
+  var linkstext = svg.selectAll("g.linklabelholder");
 
   force
-      .nodes(nodes)
-      .links(links)
+      .nodes(nodeData)
+      .links(linkData)
       .linkDistance(120)
       .flowLayout("x", 60)
       //.avoidOverlaps(true) // All goes wrong!!!
@@ -56,7 +56,9 @@ var force = cola.d3adaptor();
   function setupNodes(graphNodes, level, user) {
     if (level >= prevLevel) {
       graphNodes.forEach(function(node) {
-        var isDuplicate = _.find(nodes, function(n) { return n.id === node.id; });
+        var isDuplicate = _.find(nodeData, function(n) {
+          return n.id === node.id;
+        });
         if (!isDuplicate) {
           node.x = 0;
           node.y = 0;
@@ -64,11 +66,11 @@ var force = cola.d3adaptor();
           if (node.id === user) {
             node.root = true;
           }
-          nodes.push(node);
+          nodeData.push(node);
         };
       });
     } else {
-      _.remove(nodes, function(n) { return n.level === prevLevel; });
+      _.remove(nodeData, function(n) { return n.level === prevLevel; });
     }
   }
 
@@ -77,9 +79,9 @@ var force = cola.d3adaptor();
       if (level >= prevLevel) {
         link.level = level;
         link.weight = computeWeight(link);
-        links.push(link);
+        linkData.push(link);
       } else {
-        _.remove(links, function(l) {
+        _.remove(linkData, function(l) {
           return l.level === prevLevel;
         });
       }
@@ -95,13 +97,12 @@ var force = cola.d3adaptor();
   }
 
   function startNodes(level) {
-    node = node.data(force.nodes(), function (d) {
+    nodes = nodes.data(force.nodes(), function (d) {
       return d.id;
     });
-    node.enter()
+    nodes.enter()
       .append("circle")
         .attr("class", function (d) {
-          console.log('appending node');
           return "node " + d.id;
         })
         .attr("r", 14)
@@ -109,31 +110,30 @@ var force = cola.d3adaptor();
           return d.root ? rootColor : levelColors[d.level];
         })
         .call(force.drag);
-    node.exit().remove();
+    nodes.exit().remove();
   }
 
   function startLinks(level) {
-    path = path.data(force.links(), function (d) {
+    links = links.data(force.links(), function (d) {
       return d.source.id + "-" + d.target.id;
     });
-    path.enter()
+    links.enter()
         .append("svg:path")
         .attr('stroke-width', function (d) {
-          console.log('appending path');
           return d.weight;
         })
         .attr("class", "link")
         .attr('id', function(d) {
           return d.source.id + "-" + d.target.id;
         });
-    path.exit().remove();
+    links.exit().remove();
   }
 
   function startLinksText(level) {
-    linktext = linktext.data(force.links(), function (d) {
+    linkstext = linkstext.data(force.links(), function (d) {
       return d.source.id + "-" + d.target.id;
     });
-    linktext.enter().append("g").attr("class", "linklabelholder")
+    linkstext.enter().append("g").attr("class", "linklabelholder")
       .append("text")
         .attr("class", "linklabel")
         .attr("dx", 1)
@@ -147,7 +147,7 @@ var force = cola.d3adaptor();
         .text(function(d) {
           return d.types.join(' - ');
         });
-    linktext.exit().remove();
+    linkstext.exit().remove();
   }
 
   function start(level) {
@@ -160,20 +160,20 @@ var force = cola.d3adaptor();
   }
 
   function tick() {
-    path.attr("d", function (d) {
+    links.attr("d", function (d) {
         var dx = d.target.x - d.source.x,
             dy = d.target.y - d.source.y,
             dr = Math.sqrt(dx * dx + dy * dy);
         return "M" + d.source.x + "," + d.source.y + "A" + dr + "," + dr + " 0 0 1," + d.target.x + "," + d.target.y;
     });
 
-    node.attr("cx", function (d) { return d.x; })
+    nodes.attr("cx", function (d) { return d.x; })
         .attr("cy", function (d) { return d.y; });
   }
 
   var processData = function(graph, level, user) {
     setupNodes(graph.nodes, +level, user);
-    setupLinks(buildLinkObjs(nodes, graph.links, +level), +level);
+    setupLinks(buildLinkObjs(nodeData, graph.links, +level), +level);
 
     start(level);
   };
