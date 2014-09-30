@@ -180,7 +180,7 @@ var force = cola.d3adaptor();
     //_.forEach(link.types, function(t) {
     //  if (linkWeights[t]) { weight += linkWeights[t] };
     //});
-    return linkWeights[link.type];
+    return linkWeights[link.type]*2;
   }
 
   function startNodes(level) {
