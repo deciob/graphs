@@ -4,13 +4,20 @@ var force = cola.d3adaptor();
 
 (function() {
 
+
+
+
+
+
+
   var width = 860,
       height = 800,
       nodeData = [],
       linkData = [],
       prevLevel = 1,
-      levelColors = {1: '#2b8cbe', 2: '#a6bddb', 3: '#ece7f2'},
-      rootColor = '#e66101',
+      nodeLevelColors = {1: '#045a8d', 2: '#2b8cbe', 3: '#74a9cf', 4: '#bdc9e1', 5: '#f1eef6'},
+      nodeRootColor = '#e66101',
+      nodeLinkColor = '#333',
       linkWeights = {
         'postcode': 1,
         'birthdate': 2,
@@ -220,11 +227,11 @@ var force = cola.d3adaptor();
         })
         .attr('fill', function(d) {
           if (d.root) {
-            return rootColor;
+            return nodeRootColor;
           } else if(d.type) {
-            return '#ccc';
+            return nodeLinkColor;
           } else {
-            return levelColors[d.level];
+            return nodeLevelColors[d.level];
           }
         })
         .call(force.drag);
