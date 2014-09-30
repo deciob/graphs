@@ -4,12 +4,6 @@ var force = cola.d3adaptor();
 
 (function() {
 
-
-
-
-
-
-
   var width = 860,
       height = 800,
       nodeData = [],
@@ -18,6 +12,7 @@ var force = cola.d3adaptor();
       nodeLevelColors = {1: '#045a8d', 2: '#2b8cbe', 3: '#74a9cf', 4: '#bdc9e1', 5: '#f1eef6'},
       nodeRootColor = '#e66101',
       nodeLinkColor = '#333',
+      linkColor = '#C9C9C9',
       linkWeights = {
         'postcode': 1,
         'birthdate': 2,
@@ -104,50 +99,57 @@ var force = cola.d3adaptor();
     }
   }
 
+  // group by source, then by type.
   function setupLinkGroups(graphLinks) {
-    var linkGroups = {};
-    graphLinks.forEach(function(link) {
-      if (linkGroups[link.type] === undefined) {
-        linkGroups[link.type] = [link];
-      } else {
-        linkGroups[link.type].push(link);
-      }
+    var linkGroupsSource = _.groupBy(graphLinks, function(l) { return l.source; });
+    _.each(linkGroupsSource, function(group, source) {
+      var linkGroupsType = {};
+      group.forEach(function(link) {
+        if (linkGroupsType[link.type] === undefined) {
+          linkGroupsType[link.type] = [link];
+        } else {
+          linkGroupsType[link.type].push(link);
+        }
+      });
+      linkGroupsSource[source] = linkGroupsType;
     });
-    return d3.map(linkGroups);
+    return d3.map(linkGroupsSource);
   }
 
   function setupLinkNodes(graph, level, user) {
-    var linkGroups = setupLinkGroups(graph.links);
+    var linkGroupsSource = setupLinkGroups(graph.links);
     // reset graphLinks
     graph.links = [];
-    linkGroups.forEach(function(linkId, links) {
-      if (links.length > 1) {
-        var nodeId = links[0].source + '-' + linkId;
-        // push new `link` node
-        graph.nodes.push({'id': nodeId, 'name': linkId, 'type': 'link-node'});
-        // push new pre links
-        graph.links.push({
-          'source': links[0].source,
-          'target': nodeId,
-          'type': links[0].type,
-          'pre_link_node': true
-        });
-        links.forEach(function(link) {
-          // push new post links
+    linkGroupsSource.forEach(function(sourceId, linkGroups) {
+      _.each(linkGroups, function(links, linkId) {
+        if (links.length > 1) {
+          var nodeId = links[0].source + '-' + linkId;
+          // push new `link` node
+          graph.nodes.push({'id': nodeId, 'name': linkId, 'type': 'link-node'});
+          // push new pre links
           graph.links.push({
-            'source': nodeId,
-            'target': link.target,
-            'type': link.type
+            'source': links[0].source,
+            'target': nodeId,
+            'type': links[0].type,
+            'pre_link_node': true
           });
-        });
-      } else {
-        // push old link back in place
-        graph.links.push({
-          'source': links[0].source,
-          'target': links[0].target,
-          'type': links[0].type
-        });
-      }
+          links.forEach(function(link) {
+            // push new post links
+            graph.links.push({
+              'source': nodeId,
+              'target': link.target,
+              'type': link.type
+            });
+          });
+        } else {
+          // push old link back in place
+          graph.links.push({
+            'source': links[0].source,
+            'target': links[0].target,
+            'type': links[0].type
+          });
+        }
+      });
     });
   }
 
@@ -220,7 +222,7 @@ var force = cola.d3adaptor();
         })
         .attr('r', function (d) {
           if (d.type) {
-            return 3;
+            return 2;
           } else {
             return 9;
           }
