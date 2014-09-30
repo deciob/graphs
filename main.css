@@ -12,7 +12,7 @@
 
 .link {
   fill: none;
-  stroke: #999;
+  stroke: #aaa;
   /*stroke-width: .5px;*/
 }
 
@@ -27,7 +27,7 @@
 }
 
 text {
-  font: 8px sans-serif;
+  font: 11px sans-serif;
   pointer-events: none;
   fill: #666;
 }
