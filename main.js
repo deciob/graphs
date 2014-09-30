@@ -20,32 +20,32 @@ var force = cola.d3adaptor();
 
   var zoom = d3.behavior.zoom()
      .scaleExtent([.5, 2])
-     .on("zoom", zoomed);
+     .on('zoom', zoomed);
 
-  var root = d3.select("#js-draw-area").append("svg")
-      .attr("width", width)
-      .attr("height", height)
+  var root = d3.select('#js-draw-area').append('svg')
+      .attr('width', width)
+      .attr('height', height)
     .append('g')
       .call(zoom);
 
-  var svg = root.append("g");
-  var linkGroup = svg.append("g")
-      .attr("class", ".linkGroup");
-  var links = linkGroup.selectAll(".link");
-  var nodeGroup = svg.append("g")
-      .attr("class", ".nodeGroup");
-  var nodes = nodeGroup.selectAll(".node");
-  var textGroup = svg.append("g")
-      .attr("class", ".textGroup");
-  var linkstext = textGroup.selectAll("g.linklabelholder");
+  var svg = root.append('g');
+  var linkGroup = svg.append('g')
+      .attr('class', '.linkGroup');
+  var links = linkGroup.selectAll('.link');
+  var nodeGroup = svg.append('g')
+      .attr('class', '.nodeGroup');
+  var nodes = nodeGroup.selectAll('.node');
+  var textGroup = svg.append('g')
+      .attr('class', '.textGroup');
+  var linkstext = textGroup.selectAll('g.linklabelholder');
 
   function zoomed() {
-    svg.attr("transform", "translate(" + d3.event.translate + ")scale(" +
-     d3.event.scale + ")");
+    svg.attr('transform', 'translate(' + d3.event.translate + ')scale(' +
+     d3.event.scale + ')');
   }
 
   function slided(d){
-    zoom.scale(d3.select(this).property("value"))
+    zoom.scale(d3.select(this).property('value'))
         .event(svg);
   }
 
@@ -53,11 +53,29 @@ var force = cola.d3adaptor();
       .nodes(nodeData)
       .links(linkData)
       .linkDistance(90)
-      //.flowLayout("x", 60)
+      //.flowLayout('x', 60)
       //.avoidOverlaps(true) // All goes wrong!!!
       //.symmetricDiffLinkLengths(20) // This creates weird stuff!
       .size([width, height])
-      .on("tick", tick);
+      .on('tick', tick);
+
+
+
+
+
+  //################################################# Data setup
+
+  var processData = function(graph, level, user) {
+    // Important in order to not corrupt graph between exit/enter/update.
+    var graphCln =  _.cloneDeep(graph);
+
+    setupLinkNodes(graphCln, level, user);
+
+    setupNodes(graphCln.nodes, +level, user);
+    setupLinks(buildLinkObjs(nodeData, graphCln.links, +level), +level);
+
+    start(level);
+  };
 
   function buildLinkObjs(nodes, graphLinks, level) {
     if (level >= prevLevel) {
@@ -77,19 +95,6 @@ var force = cola.d3adaptor();
     }
   }
 
-
-
-  //################################################# Data setup
-
-  var processData = function(graph, level, user) {
-    setupLinkNodes(graph, level, user);
-
-    setupNodes(graph.nodes, +level, user);
-    setupLinks(buildLinkObjs(nodeData, graph.links, +level), +level);
-
-    start(level);
-  };
-
   function setupLinkGroups(graphLinks) {
     var linkGroups = {};
     graphLinks.forEach(function(link) {
@@ -103,12 +108,14 @@ var force = cola.d3adaptor();
   }
 
   function setupLinkNodes(graph, level, user) {
+    console.log(graph.links);
     var linkGroups = setupLinkGroups(graph.links);
     // reset graphLinks
     graph.links = [];
     linkGroups.forEach(function(linkId, links) {
       if (links.length > 1) {
         var nodeId = links[0].source + '-' + linkId;
+        //console.log(links[0]);
         // push new `link` node
         graph.nodes.push({'id': nodeId, 'name': linkId, 'type': 'link-node'});
         // push new pre links
@@ -175,29 +182,36 @@ var force = cola.d3adaptor();
 
 
 
+
+
   function computeWeight(link) {
     //var weight = 0;
     //_.forEach(link.types, function(t) {
     //  if (linkWeights[t]) { weight += linkWeights[t] };
     //});
-    return linkWeights[link.type];
+    return linkWeights[link.type]*2;
   }
 
   function startNodes(level) {
     nodes = nodes.data(force.nodes(), function (d) {
+      //console.log(d);
       return d.id;
     });
     nodes
         .enter()
-      .append("circle")
-        .attr("class", function (d) {
-          var c = "node " + d.id + " " + d.type;
+      .append('circle')
+        .attr('title', function (d) {
+          return d.id;
+        })
+        .attr('class', function (d) {
+          var type = d.type || '';
+          var c = 'node ' + d.id + ' ' + type;
           if (d.root) {
-            c = c + " root"
+            c = c + ' root';
           }
           return c;
         })
-        .attr("r", function (d) {
+        .attr('r', function (d) {
           if (d.type) {
             return 3;
           } else {
@@ -208,7 +222,7 @@ var force = cola.d3adaptor();
           if (d.root) {
             return rootColor;
           } else if(d.type) {
-            return '#ccc'
+            return '#ccc';
           } else {
             return levelColors[d.level];
           }
@@ -219,39 +233,39 @@ var force = cola.d3adaptor();
 
   function startLinks(level) {
     links = links.data(force.links(), function (d) {
-      return d.source.id + "-" + d.target.id;
+      return d.source.id + '-' + d.target.id;
     });
     links
         .enter()
-      .append("svg:path")
+      .append('svg:path')
         .attr('stroke-width', function (d) {
           return d.weight;
         })
-        .attr("class", "link")
+        .attr('class', 'link')
         .attr('id', function(d) {
-          return d.source.id + "-" + d.target.id;
+          return d.source.id + '-' + d.target.id;
         });
     links.exit().remove();
   }
 
   function startLinksText(level) {
     linkstext = linkstext.data(force.links(), function (d) {
-      return d.source.id + "-" + d.target.id;
+      return d.source.id + '-' + d.target.id;
     });
     linkstext
         .enter()
-      .append("g")
-        .attr("class", "linklabelholder")
-      .append("text")
-        .attr("class", "linklabel")
-        .attr("dx", 1)
-        .attr("dy", "-.5em")
-        .attr("text-anchor", "middle")
+      .append('g')
+        .attr('class', 'linklabelholder')
+      .append('text')
+        .attr('class', 'linklabel')
+        .attr('dx', 1)
+        .attr('dy', '-.5em')
+        .attr('text-anchor', 'middle')
       .append('textPath')
-        .attr("xlink:xlink:href", function(d) {
-          return '#' + d.source.id + "-" + d.target.id;
+        .attr('xlink:xlink:href', function(d) {
+          return '#' + d.source.id + '-' + d.target.id;
         })
-        .attr("startOffset", '50%')
+        .attr('startOffset', '50%')
         .text(function(d) {
           return d.types.join(' - ');
         });
@@ -268,16 +282,16 @@ var force = cola.d3adaptor();
   }
 
   function tick() {
-    links.attr("d", function (d) {
+    links.attr('d', function (d) {
         var dx = d.target.x - d.source.x,
             dy = d.target.y - d.source.y,
             dr = Math.sqrt(dx * dx + dy * dy);
-        return "M" + d.source.x + "," + d.source.y + "A" + dr + "," + dr +
-         " 0 0 1," + d.target.x + "," + d.target.y;
+        return 'M' + d.source.x + ',' + d.source.y + 'A' + dr + ',' + dr +
+         ' 0 0 1,' + d.target.x + ',' + d.target.y;
     });
 
-    nodes.attr("cx", function (d) { return d.x; })
-        .attr("cy", function (d) { return d.y; });
+    nodes.attr('cx', function (d) { return d.x; })
+        .attr('cy', function (d) { return d.y; });
   }
 
   var requestData = function(user, level, callback) {
@@ -301,7 +315,7 @@ var force = cola.d3adaptor();
     requestDataMemoized('a', this.value, processData);
   });
 
-  d3.select('#js-level-chooser').on("input", slided);
+  d3.select('#js-level-chooser').on('input', slided);
 
   requestDataMemoized('a', 1, processData);
 
