@@ -32,12 +32,14 @@ var force = cola.d3adaptor();
   var linkGroup = svg.append('g')
       .attr('class', '.linkGroup');
   var links = linkGroup.selectAll('.link');
+
   var nodeGroup = svg.append('g')
       .attr('class', '.nodeGroup');
   var nodes = nodeGroup.selectAll('.node');
-  var textGroup = svg.append('g')
-      .attr('class', '.textGroup');
-  var linkstext = textGroup.selectAll('g.linklabelholder');
+
+  var nodeLabelGroup = svg.append('g')
+      .attr('class', '.nodeTextGroup');
+  var nodeLabels = nodeLabelGroup.selectAll('g.node-label');
 
   function zoomed() {
     svg.attr('transform', 'translate(' + d3.event.translate + ')scale(' +
@@ -108,14 +110,12 @@ var force = cola.d3adaptor();
   }
 
   function setupLinkNodes(graph, level, user) {
-    //console.log(graph.links);
     var linkGroups = setupLinkGroups(graph.links);
     // reset graphLinks
     graph.links = [];
     linkGroups.forEach(function(linkId, links) {
       if (links.length > 1) {
         var nodeId = links[0].source + '-' + linkId;
-        //console.log(links[0]);
         // push new `link` node
         graph.nodes.push({'id': nodeId, 'name': linkId, 'type': 'link-node'});
         // push new pre links
@@ -195,7 +195,6 @@ var force = cola.d3adaptor();
 
   function startNodes(level) {
     nodes = nodes.data(force.nodes(), function (d) {
-      //console.log(d);
       return d.id;
     });
     nodes
@@ -230,6 +229,20 @@ var force = cola.d3adaptor();
         })
         .call(force.drag);
     nodes.exit().remove();
+  }
+
+  function startNodeLabels(level) {
+    nodeLabels = nodeLabels.data(force.nodes(), function (d) {
+      return d.id;
+    });
+    nodeLabels.enter()
+      .append('text')
+      .attr('class', 'node-label')
+      .text( function (d) {
+        return d.type ? '' : d.name;
+      });
+    nodeLabels.exit().remove();
+    toggleNodeLabels.call(d3.select('#js-labels').node());
   }
 
   function startLinks(level) {
@@ -276,6 +289,7 @@ var force = cola.d3adaptor();
 
   function start(level) {
     startNodes(level);
+    startNodeLabels(level);
     startLinks(level);
     //startLinksText(level);
 
@@ -299,8 +313,11 @@ var force = cola.d3adaptor();
         .attr("x2", function (d) { return d.target.x; })
         .attr("y2", function (d) { return d.target.y; });
 
-    nodes.attr('cx', function (d) { return d.x; })
-        .attr('cy', function (d) { return d.y; });
+    nodes.attr("transform", function(d) {
+            return "translate(" + d.x + "," + d.y + ")"; });
+
+    nodeLabels.attr("transform", function(d) {
+            return "translate(" + (d.x + 10) + "," + d.y + ")"; });
   }
 
   var requestData = function(user, level, callback) {
@@ -316,6 +333,21 @@ var force = cola.d3adaptor();
   var requestDataMemoized = async.memoize(requestData, function(user, level) {
     return user+level});
 
+  requestDataMemoized('a', 1, processData);
+
+
+
+
+  //################################################# Actions
+
+  function toggleNodeLabels() {
+    if (this.checked) {
+      d3.selectAll('.node-label').classed({'node-label': true, 'active': true});
+    } else {
+      d3.selectAll('.node-label').classed({'node-label': true, 'active': false});
+    }
+  }
+
   d3.selectAll('.controls > button').on('click', function() {
     d3.selectAll(d3.select(this).node().parentNode.children)
         .classed('active', false);
@@ -326,6 +358,8 @@ var force = cola.d3adaptor();
 
   d3.select('#js-level-chooser').on('input', slided);
 
-  requestDataMemoized('a', 1, processData);
+  d3.select('#js-labels').on('click', function() {
+    toggleNodeLabels.call(this);
+  });
 
 })();

@@ -1,3 +1,7 @@
+html {
+  font-family: Arial;
+}
+
 
 #js-draw-area {
   position: relative;
@@ -26,10 +30,15 @@
   /*fill: #7F2524;*/
 }
 
-text {
-  font: 11px sans-serif;
+.node-label {
+  display: none;
+}
+
+.node-label.active {
+  display: inline;
+  font-size: 14px;
   pointer-events: none;
-  fill: #666;
+  fill: #776A6A;
 }
 
 .controls {
@@ -50,7 +59,7 @@ text {
 
 .legend {
   position: absolute;
-  width: 230px;
+  width: 260px;
   bottom: 10px;
   left: 5px;
 }
@@ -89,10 +98,10 @@ ul li {
   margin-right: 10px;
 }
 
-.legend-item.postcode:before     {border-bottom: 2px solid #aaa; top: 5px;}
-.legend-item.birthdate:before    {border-bottom: 4px solid #aaa; top: 3px;}
-.legend-item.phone_number:before {border-bottom: 6px solid #aaa; top: 3px;}
-.legend-item.ip_address:before   {border-bottom: 8px solid #aaa; top: 2px;}
+.legend-item.postcode:before     {border-bottom: 2px solid #aaa; top: 2px;}
+.legend-item.birthdate:before    {border-bottom: 4px solid #aaa; top: 1px;}
+.legend-item.phone_number:before {border-bottom: 6px solid #aaa; top: 1px;}
+.legend-item.ip_address:before   {border-bottom: 8px solid #aaa; top: 1px;}
 
 
 .legend-item.circle:before {
@@ -118,13 +127,23 @@ ul li {
   width: 6px;
   height: 6px;
   background: #ece7f2;
-  top: 8px;
+  top: 10px;
   left: 5px;
 }
 
 hr { display: block; height: 1px;
     border: 0; border-top: 1px solid #ccc;
     margin: 1em 0; padding: 0; }
+
+
+.label-controller {
+  margin-left: 31px;
+  color: #565656;
+}
+
+#js-labels {
+  margin-left: 18px;
+}
 
 
 
