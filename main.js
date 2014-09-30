@@ -57,7 +57,7 @@ var force = cola.d3adaptor();
       .nodes(nodeData)
       .links(linkData)
       .linkDistance(70)
-      //.flowLayout('x', 90)
+      .flowLayout('y', 30)
       //.avoidOverlaps(true) // All goes wrong!!!
       //.symmetricDiffLinkLengths(20) // This creates weird stuff!
       .size([width, height])
@@ -222,7 +222,7 @@ var force = cola.d3adaptor();
         })
         .attr('r', function (d) {
           if (d.type) {
-            return 2;
+            return 0;
           } else {
             return 9;
           }
