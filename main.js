@@ -52,8 +52,8 @@ var force = cola.d3adaptor();
   force
       .nodes(nodeData)
       .links(linkData)
-      .linkDistance(90)
-      //.flowLayout('x', 60)
+      .linkDistance(80)
+      //.flowLayout('x', 90)
       //.avoidOverlaps(true) // All goes wrong!!!
       //.symmetricDiffLinkLengths(20) // This creates weird stuff!
       .size([width, height])
@@ -108,7 +108,7 @@ var force = cola.d3adaptor();
   }
 
   function setupLinkNodes(graph, level, user) {
-    console.log(graph.links);
+    //console.log(graph.links);
     var linkGroups = setupLinkGroups(graph.links);
     // reset graphLinks
     graph.links = [];
@@ -122,7 +122,8 @@ var force = cola.d3adaptor();
         graph.links.push({
           'source': links[0].source,
           'target': nodeId,
-          'type': links[0].type
+          'type': links[0].type,
+          'pre_link_node': true
         });
         links.forEach(function(link) {
           // push new post links
@@ -237,7 +238,8 @@ var force = cola.d3adaptor();
     });
     links
         .enter()
-      .append('svg:path')
+      //.append('svg:path')
+      .append('svg:line')
         .attr('stroke-width', function (d) {
           return d.weight;
         })
@@ -259,7 +261,7 @@ var force = cola.d3adaptor();
       .append('text')
         .attr('class', 'linklabel')
         .attr('dx', 1)
-        .attr('dy', '-.5em')
+        .attr('dy', '1em')
         .attr('text-anchor', 'middle')
       .append('textPath')
         .attr('xlink:xlink:href', function(d) {
@@ -267,7 +269,7 @@ var force = cola.d3adaptor();
         })
         .attr('startOffset', '50%')
         .text(function(d) {
-          return d.types.join(' - ');
+          return d.pre_link_node ? d.type : '';
         });
     linkstext.exit().remove();
   }
@@ -282,13 +284,20 @@ var force = cola.d3adaptor();
   }
 
   function tick() {
-    links.attr('d', function (d) {
-        var dx = d.target.x - d.source.x,
-            dy = d.target.y - d.source.y,
-            dr = Math.sqrt(dx * dx + dy * dy);
-        return 'M' + d.source.x + ',' + d.source.y + 'A' + dr + ',' + dr +
-         ' 0 0 1,' + d.target.x + ',' + d.target.y;
-    });
+    //links.attr('d', function (d) {
+    //    var dx = d.target.x - d.source.x,
+    //        dy = d.target.y - d.source.y,
+    //        dr = Math.sqrt(dx * dx + dy * dy);
+    //    return 'M' + d.source.x + ',' + d.source.y + 'A' + dr + ',' + dr +
+    //     ' 0 0 1,' + d.target.x + ',' + d.target.y;
+    //});
+
+    links.attr("x1", function (d) {
+      return d.source.x;
+    })
+        .attr("y1", function (d) { return d.source.y; })
+        .attr("x2", function (d) { return d.target.x; })
+        .attr("y2", function (d) { return d.target.y; });
 
     nodes.attr('cx', function (d) { return d.x; })
         .attr('cy', function (d) { return d.y; });
