@@ -4,7 +4,10 @@
 {"name":"e", "id":"e"},
 {"name":"ee", "id":"ee"},
 {"name":"eb", "id":"eb"},
-{"name":"cc", "id":"cc"}
+{"name":"cc", "id":"cc"},
+
+{"name":"ez", "id":"ez"},
+{"name":"ey", "id":"ey"}
 ],
 
 "links":[
@@ -13,7 +16,11 @@
 
 {"target":"ee","source":"cc","value":1,"type": "birthdate"},
 {"target":"eb","source":"cc","value":1,"type": "birthdate"},
-{"target":"b","source":"cc","value":1,"type": "birthdate"}
+{"target":"b","source":"cc","value":1,"type": "birthdate"},
+
+{"target":"ez","source":"ee","value":1,"type": "ip_address"},
+{"target":"ey","source":"ee","value":1,"type": "ip_address"},
+{"target":"ey","source":"ee","value":1,"type": "birthdate"}
 
 ]
 }
